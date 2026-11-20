@@ -13,7 +13,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Tools (Linux)
         if: runner.os == 'Linux'
@@ -22,13 +22,14 @@ jobs:
           sudo apt-get install -y clang lld python3
           echo "WASM_LD=$(command -v wasm-ld || ls /usr/bin/wasm-ld-* | sort -V | tail -1)" >> "$GITHUB_ENV"
 
-      # Apple's clang on the runners has no WebAssembly target: use LLVM's
+      # Apple's clang on the runners has no WebAssembly target: use LLVM's;
+      # wasm-ld comes with Homebrew's lld, apart from llvm
       - name: Tools (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install llvm
+          brew install llvm lld
           echo "CLANG=$(brew --prefix llvm)/bin/clang" >> "$GITHUB_ENV"
-          echo "WASM_LD=$(brew --prefix llvm)/bin/wasm-ld" >> "$GITHUB_ENV"
+          echo "WASM_LD=$(brew --prefix lld)/bin/wasm-ld" >> "$GITHUB_ENV"
 
       - name: Build the browser version
         run: make CLANG="${CLANG:-clang}" WASM_LD="$WASM_LD"

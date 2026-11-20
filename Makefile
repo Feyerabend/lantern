@@ -11,7 +11,7 @@
 #   make clean
 
 CLANG   ?= clang
-WASM_LD ?= $(shell command -v wasm-ld 2>/dev/null || echo /opt/homebrew/opt/llvm/bin/wasm-ld)
+WASM_LD ?= $(shell command -v wasm-ld 2>/dev/null || ls /opt/homebrew/opt/lld/bin/wasm-ld 2>/dev/null || echo /opt/homebrew/opt/llvm/bin/wasm-ld)
 PYTHON  ?= python3
 PORT    ?= 8742
 

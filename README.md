@@ -44,8 +44,9 @@ Some keys to start with:
 You need clang with the `wasm32` target, `wasm-ld` (from LLVM's lld), and
 Python 3. No Emscripten, no libc in the kernel.
 
-- **macOS:** `brew install llvm` for `wasm-ld`. If your clang has no
-  WebAssembly target, use LLVM's: `make CLANG=$(brew --prefix llvm)/bin/clang`.
+- **macOS:** `brew install llvm lld` (`wasm-ld` comes with lld). If your
+  clang has no WebAssembly target, use LLVM's:
+  `make CLANG=$(brew --prefix llvm)/bin/clang`.
 - **Linux:** `apt install clang lld python3`.
 
 ```
