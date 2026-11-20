@@ -1,0 +1,75 @@
+% book.tex — the manual of Lantern: the PDF edition of docs/PREFACE.md,
+% docs/OVERVIEW.md and docs/LISP-MACHINES.md.
+% Built by `make pdf` (tools/md2tex.py, then Tectonic); output: build/docs/book.pdf
+\documentclass[11pt,a4paper,oneside]{report}
+
+\usepackage{fontspec}
+\setmainfont{Charter}
+\setsansfont{Helvetica Neue}
+\setmonofont{Menlo}[Scale=0.82]
+\usepackage{newunicodechar}
+\newfontfamily\symbolfont{Zapf Dingbats}
+\newunicodechar{✓}{{\symbolfont ✓}}
+\newunicodechar{≈}{{\sffamily ≈}}
+\newunicodechar{λ}{{\sffamily λ}}
+
+\usepackage[a4paper,margin=2.4cm,top=2.2cm,bottom=2.6cm]{geometry}
+\usepackage{graphicx}
+\graphicspath{{../build/docs/}}
+\usepackage{xltabular,booktabs}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{enumitem}
+\setlist{itemsep=1pt,topsep=3pt}
+\usepackage{parskip}
+\usepackage{titlesec}
+\titleformat{\chapter}[display]{\sffamily\bfseries\Huge}{}{0pt}{}[\vspace{2pt}\titlerule]
+\titlespacing*{\chapter}{0pt}{0pt}{18pt}
+\titleformat{\section}{\sffamily\bfseries\Large}{}{0pt}{}
+% a heading never ends a page: with too little room under it, it starts the next one
+\usepackage{needspace,etoolbox}
+\pretocmd{\section}{\needspace{8\baselineskip}}{}{}
+\pretocmd{\subsection}{\needspace{6\baselineskip}}{}{}
+\titleformat{\subsection}{\sffamily\bfseries\large}{}{0pt}{}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\sffamily\small\thepage}
+\fancyhead[R]{\sffamily\small\color{gray}Lantern: A Lisp Machine in the Browser}
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\sffamily\small\thepage}}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={Lantern: A Lisp Machine in the Browser},pdfsubject={The machine, and the Lisp Machines it follows}}
+\renewcommand{\arraystretch}{1.25}
+
+\begin{document}
+
+\begin{titlepage}
+  \sffamily
+  \vspace*{3cm}
+  {\fontsize{110}{110}\selectfont λ}\par
+  \vspace{1cm}
+  {\fontsize{48}{48}\selectfont\bfseries Lantern\par}
+  \vspace{0.6cm}
+  {\Huge A Lisp Machine in the Browser\par}
+  \vspace{0.8cm}
+  {\Large The machine, and the Lisp Machines it follows\par}
+  \vspace{1.5cm}
+  {\large\color{gray} A small Lisp environment in C and WebAssembly, in the spirit of the
+  MIT CADR and the Symbolics Lisp Machines: tagged memory, a copying garbage
+  collector, a bytecode VM, and a compiler written in Lisp that compiles itself
+  at boot.\par}
+  \vfill
+  {\large Lantern 1.0 \textperiodcentered{} Milestones M0–M19 \hfill \today\par}
+\end{titlepage}
+
+\input{../build/docs/preface.tex}
+
+\tableofcontents
+
+\input{../build/docs/overview.tex}
+\input{../build/docs/history.tex}
+
+\end{document}

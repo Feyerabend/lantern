@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantern</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #fff;               /* paper, behind the last partial pixel */
+    font: 13px/1.4 ui-monospace, Menlo, monospace;
+  }
+  /* The machine's screen fills the window; host.js sizes it. */
+  #screen {
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    cursor: none;
+    outline: none;
+  }
+  #status {
+    position: fixed;
+    right: 12px;
+    top: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    opacity: 0.8;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  /* a question that needs a click (file and folder pickers), host.js ask() */
+  .ask {
+    position: fixed;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+  .ask button {
+    font: inherit;
+    padding: 3px 10px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background: #fff;
+    color: #000;
+    cursor: pointer;
+  }
+  .ask button + button { background: transparent; color: #fff; }
+</style>
+</head>
+<body>
+<canvas id="screen" tabindex="0"></canvas>
+<div id="status">loading kernel…</div>
+<script src="host.js"></script>
+</body>
+</html>

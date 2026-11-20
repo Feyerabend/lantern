@@ -1,0 +1,35 @@
+# Build Lantern and run its tests on Linux and macOS.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld python3
+          echo "WASM_LD=$(command -v wasm-ld || ls /usr/bin/wasm-ld-* | sort -V | tail -1)" >> "$GITHUB_ENV"
+
+      - name: Tools (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm
+          echo "WASM_LD=$(brew --prefix llvm)/bin/wasm-ld" >> "$GITHUB_ENV"
+
+      - name: Build the browser version
+        run: make WASM_LD="$WASM_LD"
+
+      - name: Test
+        run: make test
