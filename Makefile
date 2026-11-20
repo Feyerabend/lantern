@@ -27,6 +27,7 @@ CFLAGS        = -std=c11 -Wall -Wextra -Werror -Ikernel -Ibuild -D_DEFAULT_SOURC
 WASM_CFLAGS   = $(CFLAGS) --target=wasm32 -O2 -ffreestanding -fno-builtin -nostdlib -mbulk-memory
 NATIVE_CFLAGS = $(CFLAGS) -O1 -g -fsanitize=address,undefined
 REPL_CFLAGS   = $(CFLAGS) -O2 -g
+LDLIBS        = -lm          # the native build's sqrt, sin ...: macOS links them anyway, Linux needs this
 
 # 64 MiB of linear memory: two 8 MiB semispaces, the 2 MiB Lisp stack,
 # framebuffer + RGBA buffer for up to 2560x1600 (~20 MiB), a 1 MiB C stack.
@@ -82,13 +83,13 @@ build/web/%: host/%
 	cp $< $@
 
 build/lisp: host/native_repl.c $(LISP_SRC) $(HEADERS)
-	$(CLANG) $(REPL_CFLAGS) host/native_repl.c $(LISP_SRC) -o $@
+	$(CLANG) $(REPL_CFLAGS) host/native_repl.c $(LISP_SRC) -o $@ $(LDLIBS)
 
 build/lisp-asan: host/native_repl.c $(LISP_SRC) $(HEADERS)
-	$(CLANG) $(NATIVE_CFLAGS) host/native_repl.c $(LISP_SRC) -o $@
+	$(CLANG) $(NATIVE_CFLAGS) host/native_repl.c $(LISP_SRC) -o $@ $(LDLIBS)
 
 build/shot: tests/shot.c $(KERNEL_SRC) $(HEADERS)
-	$(CLANG) $(NATIVE_CFLAGS) tests/shot.c $(KERNEL_SRC) -o $@
+	$(CLANG) $(NATIVE_CFLAGS) tests/shot.c $(KERNEL_SRC) -o $@ $(LDLIBS)
 
 test: build/lisp build/lisp-asan build/shot
 	@echo "== Lisp test suite"
@@ -128,7 +129,7 @@ test: build/lisp build/lisp-asan build/shot
 	@echo "== M9: a world built from the files the editor saved has the change"
 	$(PYTHON) -I tools/catworld.py $(subst world/,build/shot-src/,$(WORLD)) > build/shot-src/world.lisp
 	$(PYTHON) -I tools/embed.py build/shot-src/world.lisp build/shot-src/boot_lisp.h boot_lisp
-	$(CLANG) -std=c11 -O1 -Ikernel -Ibuild/shot-src -Ibuild host/native_repl.c $(LISP_SRC) -o build/shot-src/lisp
+	$(CLANG) -std=c11 -D_DEFAULT_SOURCE -O1 -Ikernel -Ibuild/shot-src -Ibuild host/native_repl.c $(LISP_SRC) -o build/shot-src/lisp $(LDLIBS)
 	./build/shot-src/lisp tests/lisp/check.lisp tests/lisp/rebuilt.lisp
 	$(PYTHON) -I tools/ppm2png.py build/shot.ppm build/shot.png
 
@@ -143,7 +144,7 @@ SCREENSHOT_FORMS = "(defun fact (n) (if (< n 2) 1 (* n (fact (1- n)))))" "(fact 
   "(report nil)" ":Frame 0"
 
 build/screenshot: tools/screenshot.c $(KERNEL_SRC) $(HEADERS)
-	$(CLANG) $(CFLAGS) -O2 tools/screenshot.c $(KERNEL_SRC) -o $@
+	$(CLANG) $(CFLAGS) -O2 tools/screenshot.c $(KERNEL_SRC) -o $@ $(LDLIBS)
 
 build/docs/screen.png: build/screenshot tools/ppm2png.py
 	@mkdir -p build/docs

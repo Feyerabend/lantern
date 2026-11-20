@@ -22,14 +22,16 @@ jobs:
           sudo apt-get install -y clang lld python3
           echo "WASM_LD=$(command -v wasm-ld || ls /usr/bin/wasm-ld-* | sort -V | tail -1)" >> "$GITHUB_ENV"
 
+      # Apple's clang on the runners has no WebAssembly target: use LLVM's
       - name: Tools (macOS)
         if: runner.os == 'macOS'
         run: |
           brew install llvm
+          echo "CLANG=$(brew --prefix llvm)/bin/clang" >> "$GITHUB_ENV"
           echo "WASM_LD=$(brew --prefix llvm)/bin/wasm-ld" >> "$GITHUB_ENV"
 
       - name: Build the browser version
-        run: make WASM_LD="$WASM_LD"
+        run: make CLANG="${CLANG:-clang}" WASM_LD="$WASM_LD"
 
       - name: Test
-        run: make test
+        run: make test CLANG="${CLANG:-clang}"
