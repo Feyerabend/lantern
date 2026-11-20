@@ -32,7 +32,6 @@ extern void kernel_set_file_server(int);
 /* ---- the host's file server, as tools/serve.py does it ---- */
 
 static const char *source_dir;
-static int files_written;
 static char downloaded_name[256], downloaded[1 << 16];     /* the last download (op 4) */
 static long downloaded_len;
 static const char *dropped;                                 /* packed files for op 8 */
@@ -98,7 +97,6 @@ static void serve_files(void)
     if (!f) { file_reply(id, 1, "cannot write", 12); return; }
     fwrite(kernel_file_text(), 1, (size_t)kernel_file_text_length(), f);
     fclose(f);
-    files_written++;
     file_reply(id, 0, "ok", 2);
 }
 
