@@ -11,7 +11,8 @@ the Listeners, the Zmacs editor, the Inspector, the debugger with restarts,
 and presentations that keep printed output connected to its objects.
 
 The original LM-2 brochure highlights its remarkably high capacity for
-the early 1980s: https://www.bitsavers.org/pdf/symbolics/brochures/LM-2.pdf
+the early 1980s: https://www.bitsavers.org/pdf/symbolics/brochures/LM-2.pdf.
+
 Our own interpretation in Latern:
 
 ![Lantern: a Listener, the clock, a bouncing ball and a prime finder, each a window with its own process](docs/lantern.png)
