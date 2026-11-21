@@ -30,7 +30,6 @@ when you reload the page.
 
 Some keys to start with:
 
-| | |
 |---|---|
 | Mouse-R | the system menu: new Listeners, the editor, Peek, the demos |
 | F1 | Abort: stop what the selected window is doing |
@@ -73,7 +72,6 @@ repository.
 
 ## The source
 
-| | |
 |---|---|
 | `kernel/` | the C kernel: memory, garbage collector, reader, printer, interpreter, VM, graphics, files |
 | `world/` | the Lisp world, loaded in order at boot: compiler, objects, Common Lisp, windows, tools |
