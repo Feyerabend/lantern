@@ -77,6 +77,7 @@ repository.
 
 ## The source
 
+| Folder | Description |
 |---|---|
 | `kernel/` | the C kernel: memory, garbage collector, reader, printer, interpreter, VM, graphics, files |
 | `world/` | the Lisp world, loaded in order at boot: compiler, objects, Common Lisp, windows, tools |
