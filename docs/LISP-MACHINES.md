@@ -38,6 +38,17 @@ the Dolphin (1979), the Dorado and the Dandelion (1981), and the BBN
 **Jericho**, which ran Interlisp but was never sold. They share the idea of
 a personal Lisp workstation, but not the MIT/Symbolics design.
 
+Some of these machines survive. The photograph below is the front of a
+**Symbolics 3650**, one of the later, smaller cabinets of the 3600 family:
+the same 36-bit tagged architecture as the 3600 in the table above, in a
+box that fits beside a desk rather than filling a machine room. This one belongs to **Update**, the computer
+society in Uppsala, Sweden. The key
+switch on the right panel has three positions, OFF, PWR and RESET. Booting
+it loads a world from disk: the same idea Lantern follows when it reloads
+its image from the browser's storage.
+
+![The front of a Symbolics 3650, with the key switch (OFF, PWR, RESET) on the right panel. The machine is owned by the computer society Update in Uppsala.](symbolics3650.jpg)
+
 ---
 
 ## 2. What made a Lisp Machine a Lisp Machine
