@@ -10,6 +10,9 @@ it runs: the compiler (which compiles itself at boot), the window system,
 the Listeners, the Zmacs editor, the Inspector, the debugger with restarts,
 and presentations that keep printed output connected to its objects.
 
+The original LM-2 brochure highlights its remarkably high capacity for
+the early 1980s: https://www.bitsavers.org/pdf/symbolics/brochures/LM-2.pdf
+
 ![Lantern: a Listener, the clock, a bouncing ball and a prime finder, each a window with its own process](docs/lantern.png)
 
 The language is most of Common Lisp: packages, CLOS with multiple dispatch,
