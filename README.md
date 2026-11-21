@@ -34,6 +34,7 @@ when you reload the page.
 
 Some keys to start with:
 
+| K | Description |
 |---|---|
 | Mouse-R | the system menu: new Listeners, the editor, Peek, the demos |
 | F1 | Abort: stop what the selected window is doing |
