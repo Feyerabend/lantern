@@ -56,9 +56,16 @@ function keyCode(e) {
 // The world image is kept in IndexedDB under one key. It is written shortly
 // after each top-level form finishes (and on (disk-save)), and loaded at boot.
 
+// The edition: "lantern", or "plexi", the neural network environment in
+// colour (plexi.html sets LANTERN_EDITION; with a server, ?edition=plexi).
+// Each edition keeps a world of its own.
+const EDITION = typeof LANTERN_EDITION === "string" ? LANTERN_EDITION
+  : new URLSearchParams(location.search).get("edition") || "lantern";
+
 // Version 2 adds the editor's files ("files": name -> bytes), kept here when
 // there is no file server, and "meta" (the folder chosen for files, if any).
-const DB_NAME = "lisp-machine", STORE = "worlds", CURRENT = "current";
+const DB_NAME = EDITION === "plexi" ? "lisp-machine-plexi" : "lisp-machine";
+const STORE = "worlds", CURRENT = "current";
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -164,6 +171,8 @@ async function boot() {
   } else {
     k.kernel_init();
   }
+  // a world booted from source is told which edition it is; a restored one knows
+  if (!restored && EDITION === "plexi") k.kernel_set_edition(1);
 
   // ---- screen size and zoom -----------------------------------------------
   //
