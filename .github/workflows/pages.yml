@@ -1,0 +1,51 @@
+# Build the browser version and publish build/web/ on GitHub Pages:
+#   https://feyerabend.github.io/lantern/lisp.html    Lantern
+#   https://feyerabend.github.io/lantern/plexi.html   Plexi, in colour
+# (In the repository's settings, Pages must take its source from GitHub Actions.)
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# one deployment at a time; a newer push replaces one still waiting
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld python3
+          echo "WASM_LD=$(command -v wasm-ld || ls /usr/bin/wasm-ld-* | sort -V | tail -1)" >> "$GITHUB_ENV"
+
+      - name: Build the browser version
+        run: make web WASM_LD="$WASM_LD"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

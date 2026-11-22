@@ -2,6 +2,9 @@
 
 A Lisp Machine of your own, in a browser tab.
 
+Run it directly in the browser: [https://feyerabend.github.io/lantern/lisp.html](https://feyerabend.github.io/lantern/lisp.html),
+or Plexi, in colour: [https://feyerabend.github.io/lantern/plexi.html](https://feyerabend.github.io/lantern/plexi.html).
+
 Lantern is a small Lisp environment in the spirit of the MIT CADR and the
 Symbolics Lisp Machines. A C kernel, compiled to WebAssembly, gives it
 tagged memory, a copying garbage collector, a bytecode VM and a screen.
