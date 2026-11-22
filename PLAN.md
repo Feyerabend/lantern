@@ -977,6 +977,54 @@ the preface in [docs/PREFACE.md](docs/PREFACE.md), into the manual,
   - The manual (`docs/OVERVIEW.md`, the book's first chapter) now opens with
     a short history: what the Lisp Machines were, who made them, and when
     they were in use, from the late 1970s to the early 1990s.
+- **M20 — done (2026-11-22).** Colour, and Plexi: a neural network
+  environment after Symbolics' Plexi (1989).
+  - **The colour screen:**
+    - The framebuffer stays 8-bit. The kernel shows it through a colour
+      map, `*COLOR-MAP*`: 768 bytes, the red, green and blue of each ink. It
+      reads the map whenever it composes the screen, so the map is part of
+      the world and comes back with it. Without a map, ink is darkness, as
+      before.
+    - `world/color.lisp`: `(color-ink r g b)` and `(ink :orange)` give a
+      program an ink. Each colour takes the free ink nearest its own
+      darkness, so a colour picture still reads in black and white. The
+      multiples of 17 stay the sixteen greys.
+    - `(set-color-scheme :color)` and `:mono`; "Colour screen" in the
+      system menu. In colour the desktop is a plain ground and the selected
+      window's label is coloured (`*desktop-ink*`, `*label-ink*`).
+  - **Plexi** (`world/plexi.lisp`), `(plexi)` or the system menu:
+    - Networks are layers of cells (transfer function, update type, end
+      condition) joined by bundles of links (connectivity pattern, learning
+      law), built with `make-network`, `add-layer` and `connect`.
+    - The editor draws the layers as grids of cells, with the input at the
+      bottom, the activations in colour as on the brochure's cover, a
+      Hinton diagram of the links into the selected layer and a strip chart
+      of the error or energy. A click flips an input cell or moves an
+      attribute to its next choice. The window's process computes and draws
+      into a bitmap of its own.
+    - Three networks of the time: a Hopfield memory of the letters of PLEXI
+      (projection rule; Hebb's fails on letters that overlap so much), the
+      brochure's INPUT-IMAGE, COMPETE-LAYER and OUTPUT-LAYER as
+      counter-propagation (Kohonen learning with DeSieno's conscience, so
+      that no cell takes every letter), and the 8-3-8 back-propagation
+      encoder.
+    - Extensible, as the original was: `deftransfer` and `deflearning-law`
+      add to the attribute menus.
+  - **The Plexi edition:** `build/web/plexi.html` is the same machine. The
+    host tells a world booted from source which edition it is
+    (`kernel_set_edition`, `*EDITION*`), and the Screen Manager then turns
+    the colour on and opens the editor. Each edition keeps its own saved
+    world.
+  - **On the web:** a workflow builds `build/web/` and publishes it on
+    GitHub Pages at every push to `main`; the README links to `lisp.html`
+    and `plexi.html` there.
+  - **Tests:** `tests/lisp/plexi.lisp` (42 checks: inks, matrices, a network
+    built by hand, recall, competition, back propagation) runs plain and
+    under the sanitizers, but not under `--gc-every`, where its millions of
+    floats ran for more than ten minutes. The screen tests check the colour
+    map on the screen, open Plexi and click its Train button. The world
+    boots about 34k words larger, so the small-heap test runs in 385,000
+    words (was 350,000) to keep its margin.
 
 ## Vision
 
@@ -1272,6 +1320,23 @@ Lantern is 1.0:
   public repository from one clean commit.
 - **Done when:** a stranger can clone it, run `make` and `make test`, and
   open Lantern in a browser, and nothing in it is private.
+
+## After 1.0
+
+### M20 — Colour, and Plexi (done)
+- A colour map for the 8-bit screen, and colour inks that still read in
+  black and white.
+- Plexi, after the Symbolics neural network environment of 1989: an
+  editor that draws a network as layers of cells and shows it learning,
+  three networks of the period, and transfer functions and learning laws
+  that can be added from Lisp.
+- `plexi.html`, the colour edition with Plexi open; both editions on
+  GitHub Pages.
+- **Done when:** the Plexi edition boots in colour into the editor, and in
+  it a Hopfield memory recalls a noisy letter, the brochure's network
+  learns the letters from noisy images, and the encoder finds a code, all
+  while the window shows it. The screen tests and `tests/lisp/plexi.lisp`
+  check that.
 
 ## Repository layout (proposed)
 
