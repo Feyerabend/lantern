@@ -2,8 +2,6 @@
 
 A Lisp Machine of your own, in a browser tab.
 
-Run it directly in the browser: [https://feyerabend.github.io/lantern/lisp.html](https://feyerabend.github.io/lantern/lisp.html),
-or Plexi, in colour: [https://feyerabend.github.io/lantern/plexi.html](https://feyerabend.github.io/lantern/plexi.html).
 
 Lantern is a small Lisp environment in the spirit of the MIT CADR and the
 Symbolics Lisp Machines. A C kernel, compiled to WebAssembly, gives it
@@ -38,8 +36,8 @@ when you reload the page.
 
 Some keys to start with:
 
-| K | Description |
-|---|---|
+| Key/Mouse | Description |
+|-----------|-------------|
 | Mouse-R | the system menu: new Listeners, the editor, Peek, the demos |
 | F1 | Abort: stop what the selected window is doing |
 | F2 | Select: the next window |
@@ -47,7 +45,15 @@ Some keys to start with:
 | `(demo)` | the clock, the bouncing ball and the prime finder |
 | `(ed 'name)` | Zmacs, at the definition of `name` |
 
+Run it directly in the browser: [https://feyerabend.github.io/lantern/lisp.html](https://feyerabend.github.io/lantern/lisp.html).
+
+
+
 ## Plexi, in colour
+
+In the late '80s and early '90s, neural networks saw a resurgence
+as logic-based AI lost steam over unmet expectations. Still, they
+demanded more speed and memory than most computers could offer.
 
 In 1989 Symbolics sold Plexi, "an extensible, graphics-based development
 environment for constructing neural networks", for the 3600 and the XL400:
@@ -68,7 +74,7 @@ rate, noise) moves it to the next choice. There are three networks from the
 period:
 
 | Network | Description |
-|---|---|
+|---------|-------------|
 | Hopfield Memory | 100 cells, each linked to all the others, store the letters P, L, E, X and I and recall them from noisy copies, one cell at a time (Hopfield, 1982). The letters overlap too much for Hebb's rule, so it uses the projection rule (Personnaz, Guyon and Dreyfus, 1986). Switch the learning law to Hebbian and press Train to watch E fail. |
 | Competition | The brochure's own example: INPUT-IMAGE, COMPETE-LAYER, OUTPUT-LAYER. The competing cells learn the letters from noisy images without a teacher (Kohonen, with DeSieno's conscience, 1988), and the output layer is taught what each one should produce (counter-propagation, Hecht-Nielsen, 1987). |
 | Back Propagation | The 8-3-8 encoder (Rumelhart, Hinton and Williams, 1986): three hidden cells must find a code for eight patterns. |
@@ -106,6 +112,9 @@ make test       # the Lisp test suites (also under ASan/UBSan, a small heap and
 [Tectonic](https://tectonic-typesetting.github.io) and the fonts the book
 uses (Charter, Helvetica Neue, Menlo, as on macOS); the built PDF is in the
 repository.
+
+Run Plexi, in colour: [https://feyerabend.github.io/lantern/plexi.html](https://feyerabend.github.io/lantern/plexi.html).
+
 
 ## Reading
 
