@@ -215,7 +215,7 @@ Persistence comes from images (M3), not paging.
 
 | | Lisp Machines | Lantern |
 |---|---|---|
-| Screen | monochrome bitmap, portrait (CADR *approx.* 768×900), later larger and colour options | a framebuffer as large as the browser window (up to 2560×1600), 8-bit ink shown in grey, drawn into a `<canvas>` |
+| Screen | monochrome bitmap, portrait (CADR *approx.* 768×900), later larger and colour options | a framebuffer as large as the browser window (up to 2560×1600), 8-bit ink shown in grey, or in colour through a colour map (M20), drawn into a `<canvas>` |
 | Who drew it | Lisp: the TV/window system, Dynamic Windows | Lisp (M4 on); the C kernel only before the world is up |
 | Fonts | bitmap fonts (CPTFONT, Times, …), loaded from files | one hand-drawn 5×9 bitmap font (`fonts/5x9.txt`), fixed, proportional and bold, with Latin, Greek, Cyrillic and symbols (M15) |
 | Mouse | 3 buttons, doc line, who-line | 3 buttons (L/M/R), doc line, who-line ✓ |
@@ -240,6 +240,27 @@ servers (often a PDP-10 or another LM) with a generic pathname system.
 Lantern has no network of its own. Its files come through the host (M9,
 M10): a small file server under `make serve`, the browser's storage, or a
 folder the user chooses; `load` and `open` read them.
+
+### 3.13 Applications: Plexi
+
+Late in the machines' life, Symbolics sold applications that ran on top of
+Genera. One was **Plexi** (1989), "an extensible, graphics-based
+development environment for constructing neural networks", for the 3600
+family and the XL400 (the brochure is on Bitsavers). Its editor drew a
+network as layers of cells joined by bundles of links. It showed the
+activations in colour, link weights as Hinton diagrams and the error as
+strip charts. It came with Hopfield memories, competition and back
+propagation, and new transfer functions and learning laws could be written
+in Lisp. The brochure gives its speed as 65,000 connections per second.
+
+*Lantern:* its Plexi (M20, `world/plexi.lisp`) follows the brochure: the
+same editor, layers, bundles and attributes. It has a Hopfield memory, the
+brochure's own competition network and a back-propagation encoder, and
+`deftransfer` and `deflearning-law` add new transfer functions and
+learning laws. The colour screen it needs is a colour map
+over the 8-bit framebuffer. The VM does a multiply-add in about 25 steps,
+so at the browser's budget of 800,000 steps a frame Lantern can compute
+about two million connections per second.
 
 ---
 
@@ -335,6 +356,22 @@ Primary and secondary sources worth reading. Check details here, not in this doc
 - S. Levy, *Hackers: Heroes of the Computer Revolution*, 1984 (the AI Lab and
   the Symbolics/LMI split).
 - Bitsavers.org: scanned Lisp Machine manuals, memos and Symbolics documentation.
+- Symbolics, *Plexi: An extensible, graphics-based development environment
+  for constructing neural networks*, brochure, 1989 (Bitsavers,
+  `pdf/symbolics/brochures/Plexi_1989.pdf`).
+- J. J. Hopfield, "Neural networks and physical systems with emergent
+  collective computational abilities", *PNAS* 79(8), 1982.
+- L. Personnaz, I. Guyon, G. Dreyfus, "Collective computational properties
+  of neural networks: New learning mechanisms", *Physical Review A* 34(5),
+  1986.
+- T. Kohonen, "Self-organized formation of topologically correct feature
+  maps", *Biological Cybernetics* 43, 1982.
+- D. DeSieno, "Adding a conscience to competitive learning", *IEEE
+  International Conference on Neural Networks*, 1988.
+- R. Hecht-Nielsen, "Counterpropagation networks", *Applied Optics* 26(23),
+  1987.
+- D. E. Rumelhart, G. E. Hinton, R. J. Williams, "Learning representations
+  by back-propagating errors", *Nature* 323, 1986.
 - The LM-3 project and the usim CADR emulator; LambdaDelta (LMI Lambda);
   Meroko (TI Explorer). Running these is the best way to *see* the originals.
 

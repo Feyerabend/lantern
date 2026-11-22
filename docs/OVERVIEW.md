@@ -80,14 +80,19 @@ A window system, drawn entirely by Lisp (`world/windows.lisp`):
   `m-X Upload Files`, or dropping `.lisp` files on the page, move them in
   and out.
 - **One file:** `build/web/lisp.html` is the whole machine in a single file,
-  about 450 KB. Open it from disk or put it on any web host: no server is
-  needed.
+  about 970 KB. Open it from disk or put it on any web host: no server is
+  needed. Both editions are also on the web, on GitHub Pages:
+  [lisp.html](https://feyerabend.github.io/lantern/lisp.html) and
+  [plexi.html](https://feyerabend.github.io/lantern/plexi.html).
 - **Peek** (system menu): the processes with what they wait for and how much
   of the machine each uses, the windows, and memory, refreshed every second.
   Mouse-R on a process or window offers Kill Process, Select Window and so on.
 - `(demo)` opens a clock, a bouncing ball and a prime finder, each driven by
   its own process; `(graphics-demo)` a window of lines, circles, grey levels
   and fonts.
+- **Colour:** "Colour screen" in the system menu, or `(set-color-scheme
+  :color)`, shows the screen through a colour map. **Plexi** (system menu,
+  or `(plexi)`) is a neural network editor; see below.
 
 **The world is saved.** About 1.5 s after each command, the whole Lisp
 world (every function, variable and object, the Listener's text, and every
@@ -99,6 +104,47 @@ the next start fresh, Cmd+S downloads the world as a file, and dropping a
 The screen fills the browser window. Each pixel of the machine is drawn as an
 exact block of 2×2 or 3×3 screen pixels, never smoothed. Cmd + and Cmd − change
 the zoom, and Cmd 0 restores it.
+
+## Plexi, in colour
+
+In 1989 Symbolics sold Plexi for the 3600 and the XL400, "an extensible,
+graphics-based development environment for constructing neural networks".
+Lantern has one of its own, written in Lisp in `world/plexi.lisp`. The
+page `plexi.html` is the same machine as `lisp.html` with a colour screen:
+it starts in the Plexi editor and keeps a saved world of its own.
+
+![Plexi: the brochure's own network, INPUT-IMAGE, COMPETE-LAYER and OUTPUT-LAYER, learning the letters of PLEXI. A noisy I comes in and a clean one goes out; the Hinton diagram shows what each competing cell has learned, and the strip chart the error falling.](plexi.png)
+
+A network is layers of cells joined by bundles of links. Each layer has a
+transfer function, an update type (all at once, one cell at a time in no
+order, or competitive) and an end condition; each bundle has a
+connectivity pattern and a learning law. The editor draws the layers as
+grids of cells, with the input at the bottom, and shows the network
+working: the activations as coloured cells, as on the brochure's cover, the
+links into the selected layer as a Hinton diagram (a square for each link,
+its area the size of the weight), and the error, or a memory's energy, as a
+strip chart. A click on an input cell flips it; a click on an attribute
+moves it to the next choice.
+
+| Network | What it does |
+|---|---|
+| Hopfield Memory | 100 cells, each linked to all the others, store the letters P, L, E, X and I and recall them from noisy copies, one cell at a time (Hopfield, 1982). The letters overlap too much for Hebb's rule, so the links come from the projection rule (Personnaz, Guyon and Dreyfus, 1986); switch the learning law to Hebbian and E is lost. |
+| Competition | The brochure's example: INPUT-IMAGE, COMPETE-LAYER, OUTPUT-LAYER. The competing cells learn the letters from noisy images, untaught (Kohonen, with DeSieno's conscience, 1988), and the output layer is taught what each should produce (counter-propagation, Hecht-Nielsen, 1987). |
+| Back Propagation | The 8-3-8 encoder (Rumelhart, Hinton and Williams, 1986): three hidden cells must find a code for eight patterns. |
+
+Networks are built in Lisp with `make-network`, `add-layer` and `connect`,
+and `*plexi-network*` is the one on show. As in the original, the
+paradigms can be extended: `(deftransfer :name (x) ...)` adds a transfer
+function and `(deflearning-law :name (net bundle) ...)` a learning law, and
+both are in the attribute menus at once.
+
+**The colour screen.** The framebuffer is still 8 bits of ink per pixel.
+`*color-map*`, 768 bytes, gives each of the 256 inks a red, green and blue,
+and the kernel reads it whenever it shows the screen; without it, ink is
+darkness. A program asks for `(color-ink r g b)` or `(ink :orange)`, and
+each colour takes the free ink nearest its own darkness, so a colour picture
+still reads on the black-and-white screen. The multiples of 17 stay the
+sixteen greys.
 
 ## Keyboard
 
@@ -117,7 +163,7 @@ the zoom, and Cmd 0 restores it.
 | Layer | What it is | Where |
 |---|---|---|
 | Hardware | the browser's WebAssembly engine, or native for tests | — |
-| "Microcode" | C kernel, about 7,100 lines, no libc | `kernel/` |
+| "Microcode" | C kernel, about 8,300 lines, no libc | `kernel/` |
 | Memory | 64-bit tagged words, heap *indices*, Cheney copying GC | `mem.c`, `obj.c` |
 | Text | Unicode characters, narrow and wide strings, UTF-8, case | `text.c` |
 | Interpreter | explicit-stack machine: never recurses in C, can be suspended | `eval.c` |
@@ -127,7 +173,7 @@ the zoom, and Cmd 0 restores it.
 | Prelude | macros and list functions | `world/boot.lisp` |
 | Worlds | images of the heap: save, check, load | `image.c` |
 | Graphics microcode | `bitblt`, rectangles, characters from a font raster | `gprims.c` |
-| Screen, input | framebuffer, event queue, mouse cursor | `kernel.c`, `fb.c` |
+| Screen, input | framebuffer and its colour map, event queue, mouse cursor | `kernel.c`, `fb.c` |
 | Streams | host, Listener and string streams; all printing | `world/streams.lisp` |
 | Printer | `print-object`, `*print-circle*`, the pretty printer | `world/printer.lisp`, `world/pretty.lisp` |
 | Graphics | bitmaps, lines, circles, fonts built from glyph data | `world/graphics.lisp` |
@@ -137,7 +183,9 @@ the zoom, and Cmd 0 restores it.
 | Listener | Listener windows, each with its own process | `world/listener.lisp` |
 | Presentations | presented output, commands, the Inspector | `world/presentations.lisp` |
 | Demo | clock, ball, primes and graphics windows | `world/demo.lisp` |
-| Host | canvas, keyboard and mouse, zoom | `host/host.js` |
+| Colour | colour inks, ramps, the colour map, colour schemes | `world/color.lisp` |
+| Plexi | networks, learning laws, the network editor | `world/plexi.lisp` |
+| Host | canvas, keyboard and mouse, zoom, the edition | `host/host.js` |
 
 **Boot.** The interpreter runs `boot.lisp` and `compiler.lisp`. The compiler
 then compiles everything defined so far, itself included (112 functions), and
@@ -247,9 +295,9 @@ A Lisp-2 in the MacLisp / Lisp Machine Lisp tradition, with Common Lisp names:
 | Boot from a saved world | about 1 ms; a world is about 200 KB |
 | Evaluator speed | about 160 million steps/s in wasm |
 | Compiled vs. interpreted | about 3× faster (fib 3.6×, tak 5×, list work 2.7×) |
-| Tests | 1,322 Lisp checks, plus error, world-image, screen and rebuilt-world tests |
+| Tests | 1,364 Lisp checks, plus error, world-image, screen and rebuilt-world tests |
 | Stress | 133,000+ verified garbage collections without a fault |
-| Kernel size | about 530 KB of WebAssembly with the world's source inside, about 7,100 lines of C |
+| Kernel size | about 710 KB of WebAssembly with the world's source inside, about 8,300 lines of C |
 
 ## Status and road map
 
@@ -275,6 +323,7 @@ A Lisp-2 in the MacLisp / Lisp Machine Lisp tradition, with Common Lisp names:
 | M17 Common Lisp, part 6: multiple dispatch, unbound slots, `change-class`, `symbol-macrolet`, `trace` and `time`, the clock | done |
 | M18 Numbers and data: ratios, bit vectors, pathnames, byte streams | done |
 | M19 Release: Lantern 1.0, a clean public repository, README, MIT license, CI | done |
+| M20 Colour, and Plexi: a colour map, a neural network editor, `plexi.html`, GitHub Pages | done |
 
 ## Building and running
 
@@ -282,6 +331,7 @@ A Lisp-2 in the MacLisp / Lisp Machine Lisp tradition, with Common Lisp names:
 make            # build the browser version into build/web/
 make serve      # http://localhost:8742/, and world/*.lisp to the editor
 open build/web/lisp.html   # the whole machine in one file, no server
+open build/web/plexi.html  # the same, in colour, with Plexi open
 make lisp       # native REPL: ./build/lisp  (--world FILE to keep a world)
 make test       # all tests
 make pdf        # this document
