@@ -634,6 +634,34 @@ int main(int argc, char **argv)
     type_line("(stop-demo)");
     frames(10);
 
+    /* ---- the colour screen, and Plexi in it ---- */
+    {
+        uint32_t *px = kernel_present_buffer();
+        int who = (SCREEN_H - 5) * SCREEN_W + 2;         /* a pixel of the who-line: full ink */
+        fails += check(px[who] == 0xFF000000u, "black and white: full ink is black");
+        type_line("(set-color-scheme :color)");
+        frames(10);
+        fails += check(px[who] == 0xFF2C1616u, "the colour map shows full ink as *INK-COLOR*, (22 22 44)");
+        type_line("(plexi)");
+        frames(30);
+        fails += check(direct("(if (eq (find-plexi-window) *selected-window*) 1 0)") == MAKE_FIX(1),
+                       "(plexi) opens the network editor");
+        direct("(plexi-command '(:paradigm \"Back Propagation\"))");
+        frames(20);
+        /* click its Train button, where the editor last drew it */
+        click_at(direct("(let* ((w (find-plexi-window))"
+                        "       (h (find '(:train) (plexi-hits w) :key (lambda (h) (nthcdr 4 h)) :test #'equal)))"
+                        "  (and h (list (+ (window-x w) (first h) 3) (+ (window-y w) (second h) 3))))"), 0);
+        frames(60);
+        fails += check(direct("(if (> (network-period *plexi-network*) 10) 1 0)") == MAKE_FIX(1),
+                       "Mouse-L on Train: the editor's process trains the network");
+        fails += check(direct("(if (< (first (network-history *plexi-network*)) (car (last (network-history *plexi-network*)))) 1 0)")
+                       == MAKE_FIX(1), "and the error falls");
+        direct("(progn (kill-window (find-plexi-window)) (set-color-scheme :mono))");
+        frames(10);
+        fails += check(px[who] == 0xFF000000u, "back to black and white");
+    }
+
     int accepted = 0;
     for (int i = 0; i < 5000; i++) accepted += kernel_post_event(EV_MOUSE_MOVE, 760, 300, 0);
     fails += check(accepted == 4096, "the event queue holds 4096 events and rejects the rest");

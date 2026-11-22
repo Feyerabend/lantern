@@ -50,9 +50,29 @@ static inline uint32_t grey(uint8_t ink)
     return 0xFF000000u | (g << 16) | (g << 8) | g;
 }
 
+/* The colour map: what each ink looks like. Lisp sets *COLOR-MAP* to a
+ * string of 768 bytes, the red, green and blue of inks 0..255 (as the colour
+ * maps of the Lisp Machines' colour screens did); anything else means the
+ * black-and-white screen, where ink is darkness. It is read at every
+ * composed frame, so it is part of the world and comes back with it. */
+static uint32_t clut[256];
+
+static void load_color_map(void)
+{
+    obj m = SYM(intern_c("*COLOR-MAP*"), SYM_VALUE);
+    if (BSTRINGP(m) && STR_LEN(m) == 768) {
+        const uint8_t *p = (const uint8_t *)STR_DATA(m);
+        for (int i = 0; i < 256; i++, p += 3)
+            clut[i] = 0xFF000000u | ((uint32_t)p[2] << 16) | ((uint32_t)p[1] << 8) | p[0];
+    } else {
+        for (int i = 0; i < 256; i++) clut[i] = grey((uint8_t)i);
+    }
+}
+
 static void compose(void)
 {
-    for (int i = 0; i < SCREEN_W * SCREEN_H; i++) present[i] = grey(fb[i]);
+    load_color_map();
+    for (int i = 0; i < SCREEN_W * SCREEN_H; i++) present[i] = clut[fb[i]];
 
     for (int r = 0; r < CURSOR_H; r++) {
         int y = K.mouse_y + r;
@@ -61,7 +81,7 @@ static void compose(void)
             int x = K.mouse_x + c;
             char ch = cursor_shape[r][c];
             if (x < 0 || x >= SCREEN_W || ch == '.') continue;
-            present[y * SCREEN_W + x] = grey(ch == '#' ? INK_FULL : INK_PAPER);
+            present[y * SCREEN_W + x] = clut[ch == '#' ? INK_FULL : INK_PAPER];
         }
     }
 }
@@ -431,6 +451,15 @@ void kernel_file_reply(int id, int status, long n)
  * browser's storage, 3 a folder the user chose; 0 none */
 KEXPORT("kernel_set_file_server")
 void kernel_set_file_server(int on) { file_server = on; }
+
+/* Which edition of the machine the page is (host.js): 0 Lantern, 1 Plexi,
+ * the neural network environment in colour. Sets *EDITION*, which the
+ * Screen Manager looks at when it starts on an empty screen. */
+KEXPORT("kernel_set_edition")
+void kernel_set_edition(int edition)
+{
+    SYM(intern_c("*EDITION*"), SYM_VALUE) = edition == 1 ? intern_c(":PLEXI") : NIL;
+}
 
 KEXPORT("kernel_post_event")
 int kernel_post_event(uint32_t type, int32_t a, int32_t b, uint32_t mods)

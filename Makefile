@@ -5,9 +5,10 @@
 #   make test     run all native tests (Lisp suite, GC stress, errors, screen)
 #   make stress   collect every 10 allocations and verify the heap (slow)
 #   make serve    serve build/web/ on http://localhost:8742/, and world/*.lisp to the editor
-#                 (build/web/lisp.html is the whole machine in one file: open it from disk)
+#                 (build/web/lisp.html is the whole machine in one file: open it from disk;
+#                 build/web/plexi.html is the Plexi edition, in colour, the same way)
 #   make pdf      docs/A-Lisp-Machine-in-the-Browser.pdf from docs/*.md (needs Tectonic)
-#   make docs/lantern.png   the README's screenshot
+#   make docs/lantern.png   the README's screenshot (and docs/plexi.png, Plexi's)
 #   make clean
 
 CLANG   ?= clang
@@ -35,17 +36,23 @@ WASM_LDFLAGS = --no-entry --initial-memory=67108864 --max-memory=268435456 -z st
 
 WASM_OBJ = $(patsubst kernel/%.c,build/wasm/%.o,$(KERNEL_SRC))
 TESTS    = tests/lisp/check.lisp tests/lisp/core.lisp tests/lisp/control.lisp tests/lisp/objects.lisp tests/lisp/gc.lisp tests/lisp/debugger.lisp tests/lisp/cl.lisp tests/lisp/cl2.lisp tests/lisp/cl3.lisp tests/lisp/cl4.lisp tests/lisp/cl5.lisp tests/lisp/cl6.lisp tests/lisp/cl7.lisp tests/lisp/cl8.lisp
+# the neural networks compute with floats by the million: not under --gc-every
+SLOW_TESTS = tests/lisp/plexi.lisp
 ERRORS_EXPECTED = 16
 
 .PHONY: all web lisp test stress serve clean pdf
 
 all: web
 
-web: build/web/kernel.wasm build/web/index.html build/web/host.js build/web/lisp.html
+web: build/web/kernel.wasm build/web/index.html build/web/host.js build/web/lisp.html build/web/plexi.html
 
 # the whole machine as one file, for opening from disk or any plain web host
 build/web/lisp.html: build/web/kernel.wasm host/index.html host/host.js tools/single.py
 	$(PYTHON) -I tools/single.py host/index.html host/host.js build/web/kernel.wasm > $@
+
+# the Plexi edition: the same machine, in colour, with the neural network editor open
+build/web/plexi.html: build/web/kernel.wasm host/index.html host/host.js tools/single.py
+	$(PYTHON) -I tools/single.py host/index.html host/host.js build/web/kernel.wasm plexi Plexi > $@
 
 lisp: build/lisp
 
@@ -59,7 +66,8 @@ build/font5x9.h: fonts/5x9.txt tools/mkfont.py
 # ";;;; FILE name", so that the editor can show the source as files again.
 WORLD = world/boot.lisp world/compiler.lisp world/streams.lisp world/objects.lisp world/processes.lisp \
         world/conditions.lisp world/cl.lisp world/packages.lisp world/cl2.lisp world/signals.lisp world/printer.lisp world/pretty.lisp world/reader.lisp world/cl3.lisp world/cl4.lisp build/font_5x9.lisp world/graphics.lisp world/windows.lisp \
-        world/listener.lisp world/presentations.lisp world/debugger.lisp world/editor.lisp world/peek.lisp world/demo.lisp
+        world/listener.lisp world/presentations.lisp world/debugger.lisp world/editor.lisp world/peek.lisp world/demo.lisp \
+        world/color.lisp world/plexi.lisp
 
 build/font_5x9.lisp: fonts/5x9.txt tools/mkfont.py
 	@mkdir -p build
@@ -93,11 +101,11 @@ build/shot: tests/shot.c $(KERNEL_SRC) $(HEADERS)
 
 test: build/lisp build/lisp-asan build/shot
 	@echo "== Lisp test suite"
-	./build/lisp --stats $(TESTS)
+	./build/lisp --stats $(TESTS) $(SLOW_TESTS)
 	@echo "== same, with address/UB sanitizers"
-	./build/lisp-asan $(TESTS)
+	./build/lisp-asan $(TESTS) $(SLOW_TESTS)
 	@echo "== small heap (many collections)"
-	./build/lisp --stats --heap 350000 tests/lisp/check.lisp tests/lisp/gc.lisp
+	./build/lisp --stats --heap 385000 tests/lisp/check.lisp tests/lisp/gc.lisp
 	@echo "== GC stress: collect every 100 allocations, verifying the heap each time"
 	./build/lisp --stats --gc-verify --gc-every 100 tests/lisp/check.lisp tests/lisp/core.lisp tests/lisp/control.lisp
 	@echo "== errors are reported and the system stays usable"
@@ -161,6 +169,15 @@ docs/lantern.png: build/screenshot tools/ppm2png.py
 	@mkdir -p build/docs
 	./build/screenshot build/docs/lantern.ppm 900 600 2 $(README_FORMS) > /dev/null
 	$(PYTHON) -I tools/ppm2png.py build/docs/lantern.ppm $@
+
+# Plexi's picture: the brochure's network, learning
+# (the second line, "()", only gives it time: Plexi has the keyboard and ignores it)
+PLEXI_FORMS = '(progn (plexi-edition) (plexi-command (quote (:paradigm "Competition"))) (plexi-command (quote (:train))))' '()'
+
+docs/plexi.png: build/screenshot tools/ppm2png.py
+	@mkdir -p build/docs
+	./build/screenshot build/docs/plexi.ppm 840 520 2 $(PLEXI_FORMS) > /dev/null
+	$(PYTHON) -I tools/ppm2png.py build/docs/plexi.ppm $@
 
 build/docs/overview.tex: docs/OVERVIEW.md tools/md2tex.py
 	@mkdir -p build/docs

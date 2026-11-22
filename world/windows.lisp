@@ -89,6 +89,9 @@
 (defvar *doc-shown* "")
 (defvar *highlight* nil)            ; (window . presentation) under the mouse
 (defvar *window-count* 0)
+(defvar *desktop-ink* nil)          ; the desktop's colour (color.lisp); NIL: grey dots
+(defvar *label-ink* 255)            ; the selected window's title bar
+(defvar *edition* nil)              ; :PLEXI when the page is Plexi (the kernel sets it)
 
 (defconstant label-height 15)
 (defconstant doc-height 15)
@@ -175,7 +178,7 @@
 (defun draw-label (w)
   (let ((b (window-bitmap w)) (wd (window-width w)))
     (if (eq w *selected-window*)
-        (progn (draw-rectangle 0 0 wd label-height alu-seta 255 b)
+        (progn (draw-rectangle 0 0 wd label-height alu-seta *label-ink* b)
                (draw-string (window-label w) 6 3 *font-bold* alu-andca b))
         (progn (erase-rectangle 1 1 (- wd 2) (- label-height 1) b)
                (draw-rectangle 0 (1- label-height) wd 1 alu-seta 255 b)
@@ -295,14 +298,18 @@
 ;;; ---- compositing ------------------------------------------------------------------
 
 ;; the desktop: a light grey made of dots, built a row at a time
+;; (in colour, a plain ground of *DESKTOP-INK*)
 (defun make-background ()
   (let* ((w (%screen-width)) (h (%screen-height)) (b (make-bitmap w h)) (x 0) (y 0))
-    (while (< x w) (draw-point x 0 alu-seta 255 b) (setq x (+ x 2)))
-    (while (< y h)
-      (bitblt alu-seta w 1 b 0 0 b (if (= 0 (rem (%quotient y 2) 2)) 0 1) y)
-      (setq y (+ y 2)))
-    (erase-rectangle 0 0 1 1 b)
-    (draw-point 0 0 alu-seta 255 b)
+    (cond (*desktop-ink*
+           (draw-rectangle 0 0 w h alu-seta *desktop-ink* b))
+          (t
+           (while (< x w) (draw-point x 0 alu-seta 255 b) (setq x (+ x 2)))
+           (while (< y h)
+             (bitblt alu-seta w 1 b 0 0 b (if (= 0 (rem (%quotient y 2) 2)) 0 1) y)
+             (setq y (+ y 2)))
+           (erase-rectangle 0 0 1 1 b)
+           (draw-point 0 0 alu-seta 255 b)))
     b))
 
 (defun draw-blinker ()
@@ -444,7 +451,11 @@
    (list (cons "Select next window" (lambda (w) (select-next-window)))
          (cons "Demo windows" (lambda (w) (demo)))
          (cons "Stop demo windows" (lambda (w) (stop-demo)))
-         (cons "Graphics demo" (lambda (w) (graphics-demo))))))
+         (cons "Graphics demo" (lambda (w) (graphics-demo)))
+         (cons "Plexi neural networks" (lambda (w) (plexi)))
+         (if (eq *color-scheme* :color)
+             (cons "Black and white screen" (lambda (w) (set-color-scheme :mono)))
+             (cons "Colour screen" (lambda (w) (set-color-scheme :color)))))))
 
 ;;; ---- input ----------------------------------------------------------------------------
 
@@ -564,7 +575,9 @@
   (setq *screen-manager* *current-process*)
   (setq *standard-output* *host-stream*)
   (setq *background* nil *menu* nil *drag* nil)
-  (when (null *windows*) (make-listener-window))
+  (when (null *windows*)
+    (make-listener-window)
+    (when (eq *edition* :plexi) (plexi-edition)))
   (maintain-windows)
   (update-doc)
   (window-changed)
